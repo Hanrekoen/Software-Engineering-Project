@@ -1,0 +1,11 @@
+/**
+ * Wraps an async Express route/controller so any rejected promise is
+ * forwarded to next(err) instead of needing a try/catch in every
+ * controller. Keeps controllers thin (Controllers layer: "HTTP
+ * concerns" only, per the System Plan architecture diagram).
+ */
+const asyncHandler = (fn) => (req, res, next) => {
+  Promise.resolve(fn(req, res, next)).catch(next);
+};
+
+module.exports = asyncHandler;
