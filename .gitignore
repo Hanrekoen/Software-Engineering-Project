@@ -37,3 +37,6 @@ desktop.ini
 # misc
 .cache/
 tmp/
+
+# local-only: superseded duplicates kept for reference, not part of the build
+_superseded/
