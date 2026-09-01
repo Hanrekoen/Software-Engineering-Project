@@ -2,6 +2,10 @@
 const mongoose = require("mongoose");
 const env = require("./env");
 
+// Registering every schema before any query runs. Without this a .populate()
+// on a model that has not been required yet throws MissingSchemaError.
+require("../models");
+
 // Singleton - one connection pool per process.
 let connection = null;
 
