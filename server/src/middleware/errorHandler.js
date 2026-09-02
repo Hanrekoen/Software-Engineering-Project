@@ -20,7 +20,7 @@ module.exports = function errorHandler(err, req, res, _next) {
     status = 400;
     code = "INVALID_JSON";
     message = "Request body is not valid JSON";
-  } else if (err.name === "TookenExpiredError") {
+  } else if (err.name === "TokenExpiredError") {
     // express.json() JSON parse error
     status = 401;
     code = "TOKEN_EXPIRED";

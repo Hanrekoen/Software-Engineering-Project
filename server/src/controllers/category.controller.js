@@ -1,5 +1,4 @@
 "use strict";
-const { create } = require("../repositories/product.repository");
 const categoryService = require("../services/category.service");
 const { ok, created, noContent } = require("../utils/response");
 
@@ -9,6 +8,10 @@ async function list(req, res) {
 
 async function getbyslug(req, res) {
   return ok(res, await categoryService.getbyslug(req.params.slug));
+}
+
+async function create(req, res) {
+  return created(res, await categoryService.create(req.body));
 }
 
 async function update(req, res) {

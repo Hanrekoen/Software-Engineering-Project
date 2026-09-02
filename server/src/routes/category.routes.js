@@ -1,5 +1,5 @@
 "use strict"
-constexpress = require("express");
+const express = require("express");
 const asynchandler = require("../utils/asyncHandler");
 const controller = require("../controllers/category.controller");
 

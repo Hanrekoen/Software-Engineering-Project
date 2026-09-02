@@ -18,7 +18,7 @@ const Product = require("../src/models/product.model");
 const User = require("../src/models/user.model");
 const Cart = require("../src/models/cart.model");
 const Order = require("../src/models/order.model");
-const {buildorder} = require("../src/services/order.factory");
+const {buildOrder} = require("../src/services/order.factory");
 
 //dev accounts password for seeding
 const seed_password = "Password123!";
@@ -28,51 +28,46 @@ const USERS = [
     firstName: "Obusitse",
     lastName: "Admin",
     email: "Obusitse.admin@sen371.test",
-    password: seed_password,
     role: "admin",
-    address: [],
+    addresses: [],
   },
 
   {
     firstName: "Hanre",
     lastName: "Admin",
     email: "Hanre.admin@sen371.test",
-    password: seed_password,
     role: "admin",
-    address: []
+    addresses: []
   }, 
 
   { firstName: "Ryno",
     lastName: "Admin",
     email: "Ryno.admin@sen371.test",
-    password: seed_password,
     role: "admin",
-    address: []
+    addresses: []
   },
 
   {
     firstName: "Zander",
     lastName: "Admin",
     email: "Zander.admin@sen371.test",
-    password: seed_password,
     role: "admin",
-    address: []
+    addresses: []
   }, 
 
   {
     firstName: "Lebo",
     lastName: "Sekgobela",
     email: "Lebo@sen371.test",
-    password: seed_password,
     role: "customer",
-    address: [{
+    addresses: [{
       label: "Home",
-      street: "123 Main Street",
+      line1: "123 Main Street",
       city: "Cape Town",
       province: "Western Cape",
       postalCode: "8001",
       country: "South Africa",
-      isdefault: true,
+      isDefault: true,
     }]
   }, 
 
@@ -82,14 +77,14 @@ const USERS = [
     email: "Sipho@sen371.test",
     password: seed_password,
     role: "customer",
-    address: [{
+    addresses: [{
       label: "Home",
-      street: "456 Oak Avenue",
+      line1: "456 Oak Avenue",
       city: "Cape Town",
       province: "Western Cape",
       postalCode: "8001",
       country: "South Africa",
-      isdefault: true,
+      isDefault: true,
     }]
   }, 
 
@@ -99,14 +94,14 @@ const USERS = [
     email: "Tshepo@sen371.test",
     password: seed_password,
     role: "customer",
-    address: [{
+    addresses: [{
       label: "Home",
-      street: "789 Pine Road",
+      line1: "789 Pine Road",
       city: "Pretoria",
       province: " Gauteng",
       postalCode: "0118",
       country: "South Africa",
-      isdefault: true,
+      isDefault: true,
     }]
   }, 
 
@@ -116,14 +111,14 @@ const USERS = [
     email: "Scott@sen371.test",
     password: seed_password,
     role: "customer",
-    address: [{
+    addresses: [{
       label: "Home",
-      street: "101 Maple Lane",
+      line1: "101 Maple Lane",
       city: "Pretoria",
       province: " Gauteng",
       postalCode: "0118",
       country: "South Africa",
-      isdefault: true,
+      isDefault: true,
     }]
   }, 
 ];
@@ -266,9 +261,9 @@ async function run() {
   console.log(`[seed] inserted ${inserted.length} products`);
 
   const hashedPassword = await bcrypt.hash(seed_password, 10);
-  const users = await User.insertMany(USERS.map((u) => ({ ...u, password: hashedPassword })));
+  const users = await User.insertMany(USERS.map((u) => ({ ...u, passwordhash: hashedPassword })));
   console.log(`[seed] inserted ${users.length} users (password: ${seed_password})`);
-  const [lebo, sipho, tshepo, scott] = users;
+  const [, , , ,lebo, sipho, tshepo, scott] = users;
 
   await Cart.create ({ 
     userId: lebo._id, 
@@ -279,14 +274,14 @@ async function run() {
    });
    console.log(`[seed] created cart for ${lebo.firstName} ${lebo.lastName}`);
 
-   const orderData = buildorder({
+   const orderData = buildOrder({
     userId: sipho._id,
     cartItems: [
       { productId: inserted[1]._id, quantity: 1, finish: inserted[1].variants[0]?.name },
       { productId: inserted[3]._id, quantity: 2, finish: inserted[3].variants[0]?.name },
     ],
     products: inserted,
-    shippingAddress: sipho.address[0],
+    shippingAddress: sipho.addresses[0],
   });
   orderData.status = "paid"; // Mark the order as paid for seeding purposes
   await Order.create(orderData);
