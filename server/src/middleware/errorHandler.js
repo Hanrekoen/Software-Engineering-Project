@@ -2,8 +2,7 @@
 const { AppError } = require("../errors/AppError");
 const env = require("../config/env");
 
-// PERSON 4 OWNS THIS FILE. Working baseline - improve it.
-// Must be mounted LAST in app.js, after all routes.
+// PERSON 4 - Error handling (middleware)
 
 module.exports = function errorHandler(err, req, res, _next) {
   let status = 500;
@@ -16,6 +15,21 @@ module.exports = function errorHandler(err, req, res, _next) {
     code = err.code;
     message = err.message;
     details = err.details;
+  } else if (err.type === "entity.parse.failed") {
+    // body-parser JSON parse error
+    status = 400;
+    code = "INVALID_JSON";
+    message = "Request body is not valid JSON";
+  } else if (err.name === "TookenExpiredError") {
+    // express.json() JSON parse error
+    status = 401;
+    code = "TOKEN_EXPIRED";
+    message = "Your session has expired - please log in again";
+  } else if (err.name === "JsonWebTokenError") {
+    // express.json() JSON parse error
+    status = 401;
+    code = "INVALID_TOKEN";
+    message = "Invalid authentication token";
   } else if (err.name === "ValidationError") {
     // Mongoose schema validation
     status = 400;

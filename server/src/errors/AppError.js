@@ -1,8 +1,6 @@
 "use strict";
 
-// PERSON 4 OWNS THIS FILE. Minimal version so the app boots - extend it.
-// Every error thrown in this application should be one of these classes,
-// never a raw string or a bare Error.
+// PERSON 4 OWNS THIS FILE
 
 class AppError extends Error {
   constructor(message, status = 500, code = "INTERNAL_ERROR", details = null) {
@@ -48,11 +46,24 @@ class ConflictError extends AppError {
 
 class BusinessRuleError extends AppError {
   constructor(message = "That action is not allowed in the current state") {
-    super(message, 422, "RULE_VIOLATION");
+    super(message, 429, "RULE_VIOLATION");
+  }
+}
+
+class TooManyRequestsError extends AppError {
+  constructor(message = "Too many requests - please try again later") {
+    super(message, 429, "TOO_MANY_REQUESTS");
+  }
+}
+
+class ServiceUnavailableError extends AppError {
+  constructor(message = "Service is temporarily unavailable") {
+    super(message, 503, "SERVICE_UNAVAILABLE");
   }
 }
 
 module.exports = {
   AppError, ValidationError, UnauthorizedError,
   ForbiddenError, NotFoundError, ConflictError, BusinessRuleError,
+  TooManyRequestsError, ServiceUnavailableError,
 };
