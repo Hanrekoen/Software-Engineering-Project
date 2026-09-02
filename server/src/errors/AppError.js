@@ -46,7 +46,7 @@ class ConflictError extends AppError {
 
 class BusinessRuleError extends AppError {
   constructor(message = "That action is not allowed in the current state") {
-    super(message, 429, "RULE_VIOLATION");
+    super(message, 422, "RULE_VIOLATION");
   }
 }
 

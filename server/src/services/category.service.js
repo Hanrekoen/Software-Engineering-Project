@@ -42,7 +42,7 @@ async function update(id, Data) {
         if (slugClash && String(slugClash.id) !== String(id)) 
             throw new ConflictError(`Category with slug "${updates.slug}" already exists`);
     }
-  const updated = await categoryRepository.update(id, updates);
+  const updated = await categoryRepository.updateById(id, updates);
   if (!updated) throw new NotFoundError("Category");
   return updated;
 }
@@ -51,9 +51,10 @@ async function remove(id) {
   const category = await categoryRepository.findById(id);
   if (!category) throw new NotFoundError("Category");   
 
-   constproductsusingcategory = await productRepository.count({ categoryId: id });
+   const productsusingcategory = await productRepository.count({ categoryId: id });
     if (productsusingcategory > 0) {
-        throw new BusinessRuleError(`Cannot delete  "${category.name}" - ${productsusingcategory} products still associated with this category`);
+        throw new BusinessRuleError(
+          `Cannot delete  "${category.name}" - ${productsusingcategory} products still associated with this category`);
     }
   await categoryRepository.deleteById(id);
 }
