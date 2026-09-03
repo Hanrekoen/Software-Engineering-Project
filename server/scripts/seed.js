@@ -7,9 +7,121 @@
  *
  * Person 4 owns this file going forward - extend it with users and orders.
  */
+//const { connect, disconnect } = require("../src/config/database");
+//const Category = require("../src/models/category.model");
+//const Product = require("../src/models/product.model");
+
+const bcrypt = require("bcrypt");
 const { connect, disconnect } = require("../src/config/database");
 const Category = require("../src/models/category.model");
 const Product = require("../src/models/product.model");
+const User = require("../src/models/user.model");
+const Cart = require("../src/models/cart.model");
+const Order = require("../src/models/order.model");
+const {buildOrder} = require("../src/services/order.factory");
+
+//dev accounts password for seeding
+const seed_password = "Password123!";
+
+const USERS = [
+  {
+    firstName: "Obusitse",
+    lastName: "Admin",
+    email: "Obusitse.admin@sen371.test",
+    role: "admin",
+    addresses: [],
+  },
+
+  {
+    firstName: "Hanre",
+    lastName: "Admin",
+    email: "Hanre.admin@sen371.test",
+    role: "admin",
+    addresses: []
+  }, 
+
+  { firstName: "Ryno",
+    lastName: "Admin",
+    email: "Ryno.admin@sen371.test",
+    role: "admin",
+    addresses: []
+  },
+
+  {
+    firstName: "Zander",
+    lastName: "Admin",
+    email: "Zander.admin@sen371.test",
+    role: "admin",
+    addresses: []
+  }, 
+
+  {
+    firstName: "Lebo",
+    lastName: "Sekgobela",
+    email: "Lebo@sen371.test",
+    role: "customer",
+    addresses: [{
+      label: "Home",
+      line1: "123 Main Street",
+      city: "Cape Town",
+      province: "Western Cape",
+      postalCode: "8001",
+      country: "South Africa",
+      isDefault: true,
+    }]
+  }, 
+
+  {
+    firstName: "Sipho",
+    lastName: "Mokoena",
+    email: "Sipho@sen371.test",
+    password: seed_password,
+    role: "customer",
+    addresses: [{
+      label: "Home",
+      line1: "456 Oak Avenue",
+      city: "Cape Town",
+      province: "Western Cape",
+      postalCode: "8001",
+      country: "South Africa",
+      isDefault: true,
+    }]
+  }, 
+
+  {
+    firstName: "Tshepo",
+    lastName: "Dlamini",
+    email: "Tshepo@sen371.test",
+    password: seed_password,
+    role: "customer",
+    addresses: [{
+      label: "Home",
+      line1: "789 Pine Road",
+      city: "Pretoria",
+      province: " Gauteng",
+      postalCode: "0118",
+      country: "South Africa",
+      isDefault: true,
+    }]
+  }, 
+
+  {
+    firstName: "Scott",
+    lastName: "Crabtree",
+    email: "Scott@sen371.test",
+    password: seed_password,
+    role: "customer",
+    addresses: [{
+      label: "Home",
+      line1: "101 Maple Lane",
+      city: "Pretoria",
+      province: " Gauteng",
+      postalCode: "0118",
+      country: "South Africa",
+      isDefault: true,
+    }]
+  }, 
+];
 
 const CATEGORIES = [
   { name: "Audio Architecture", slug: "audio-architecture", icon: "audio",
@@ -120,7 +232,11 @@ async function run() {
 
   await Category.deleteMany({});
   await Product.deleteMany({});
+  await User.deleteMany({});
+  await Cart.deleteMany({});
+  await Order.deleteMany({});
   console.log("[seed] cleared categories and products");
+
 
   const categories = await Category.insertMany(CATEGORIES);
   const bySlug = Object.fromEntries(categories.map((c) => [c.slug, c._id]));
@@ -143,6 +259,33 @@ async function run() {
 
   const inserted = await Product.insertMany(products);
   console.log(`[seed] inserted ${inserted.length} products`);
+
+  const hashedPassword = await bcrypt.hash(seed_password, 10);
+  const users = await User.insertMany(USERS.map((u) => ({ ...u, passwordhash: hashedPassword })));
+  console.log(`[seed] inserted ${users.length} users (password: ${seed_password})`);
+  const [, , , ,lebo, sipho, tshepo, scott] = users;
+
+  await Cart.create ({ 
+    userId: lebo._id, 
+    items: [
+      { productId: inserted[0]._id, quantity: 1, finish: inserted[0].variants[0]?.name },
+      { productId: inserted[2]._id, quantity: 1, finish: inserted[2].variants[0]?.name },
+   ],
+   });
+   console.log(`[seed] created cart for ${lebo.firstName} ${lebo.lastName}`);
+
+   const orderData = buildOrder({
+    userId: sipho._id,
+    cartItems: [
+      { productId: inserted[1]._id, quantity: 1, finish: inserted[1].variants[0]?.name },
+      { productId: inserted[3]._id, quantity: 2, finish: inserted[3].variants[0]?.name },
+    ],
+    products: inserted,
+    shippingAddress: sipho.addresses[0],
+  });
+  orderData.status = "paid"; // Mark the order as paid for seeding purposes
+  await Order.create(orderData);
+  console.log(`[seed] created paid order for ${sipho.firstName} ${sipho.lastName}`);
 
   await disconnect();
   console.log("[seed] done");

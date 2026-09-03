@@ -16,8 +16,8 @@ class CategoryRepository extends baseRepository {
   }
 
   async list() {
-    return this.model();
+    return this.model.find().sort({ name: 1 }).exec();
   }
 }
 
-module.exports = CategoryRepository;
+module.exports = new CategoryRepository;
