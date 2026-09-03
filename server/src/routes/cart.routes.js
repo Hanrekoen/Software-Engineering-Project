@@ -6,7 +6,7 @@ const { authenticate } = require("../middleware/auth");
 
 const router = express.Router();
 
-// Every cart route requires a signed-in user.
+// All cart routes require a signed-in user.
 router.use(authenticate);
 
 router.get("/", asyncHandler(controller.getCart));

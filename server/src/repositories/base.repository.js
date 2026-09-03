@@ -1,8 +1,6 @@
 "use strict";
 
-// The ONLY layer allowed to touch Mongoose.
-// Services depend on this interface, never on the driver, which is what
-// lets them be unit-tested against an in-memory fake.
+// The only layer allowed to touch Mongoose, so services stay testable.
 
 class BaseRepository {
   constructor(model) {

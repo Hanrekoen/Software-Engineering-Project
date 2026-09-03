@@ -2,8 +2,6 @@
 const { AppError } = require("../errors/AppError");
 const env = require("../config/env");
 
-// PERSON 4 - Error handling (middleware)
-
 module.exports = function errorHandler(err, req, res, _next) {
   let status = 500;
   let code = "INTERNAL_ERROR";

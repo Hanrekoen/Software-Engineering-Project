@@ -21,14 +21,12 @@ const userSchema = new mongoose.Schema(
     lastName:  { type: String, required: true, trim: true, minlength: 2, maxlength: 50 },
     email:     { type: String, required: true, unique: true, lowercase: true, trim: true },
 
-    // select:false keeps the hash out of every query result unless a caller
-    // explicitly opts in with .select("+passwordHash"). This is what stops a
-    // password hash leaking through an endpoint written in a hurry.
+    // select:false - excluded from queries unless explicitly requested.
     passwordHash: { type: String, required: true, select: false },
 
     role:      { type: String, enum: ["customer", "admin"], default: "customer" },
 
-    // Incremented on logout so outstanding refresh tokens stop verifying.
+    // Bumped on logout to invalidate outstanding refresh tokens.
     tokenVersion: { type: Number, default: 0 },
 
     addresses: { type: [addressSchema], default: [] },

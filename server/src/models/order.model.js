@@ -3,8 +3,7 @@ const mongoose = require("mongoose");
 
 const ORDER_STATUSES = ["pending", "paid", "shipped", "delivered", "cancelled"];
 
-// Order items COPY the name and price at purchase time. An order is a
-// financial record: renaming or repricing a product later must not rewrite it.
+// Items copy name and price at purchase time - an order is a financial record.
 const orderItemSchema = new mongoose.Schema(
   {
     productId:      { type: mongoose.Schema.Types.ObjectId, ref: "Product", required: true },

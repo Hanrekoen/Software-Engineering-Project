@@ -2,9 +2,7 @@
 const cartService = require("../services/cart.service");
 const { ok, created } = require("../utils/response");
 
-// The cart always belongs to the authenticated user. userId is read from the
-// verified token, never from the URL - taking it from the path would let any
-// signed-in user read or edit anyone else's cart.
+// userId comes from the verified token, never the URL.
 
 async function getCart(req, res) {
   return ok(res, await cartService.getCart(req.user.id));

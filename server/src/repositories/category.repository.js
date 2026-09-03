@@ -2,8 +2,6 @@
 const baseRepository = require("./base.repository");
 const Category = require("../models/category.model");
 
-// PERSON 4 OWNS THIS FILE
-
 class CategoryRepository extends baseRepository {
   constructor() {
     super(Category);

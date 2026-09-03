@@ -11,8 +11,7 @@ class CartRepository extends BaseRepository {
     return this.findOne({ userId });
   }
 
-  // A user always has a cart from their point of view - create it lazily on
-  // first access rather than making every caller handle "no cart yet".
+  // Created lazily so callers never handle a missing cart.
   async findOrCreateByUser(userId) {
     const existing = await this.findOne({ userId });
     if (existing) return existing;

@@ -9,9 +9,7 @@ const {
   BusinessRuleError,
 } = require("../errors/AppError");
 
-/**
- * Allowed order status transitions. Anything not listed is rejected with 422.
- */
+// Allowed status transitions. Anything else is rejected with 422 (FR-10).
 const TRANSITIONS = {
   pending:   ["paid", "cancelled"],
   paid:      ["shipped", "cancelled"],
@@ -20,17 +18,8 @@ const TRANSITIONS = {
   cancelled: [],
 };
 
-/**
- * Checkout.
- *
- * Steps, in order:
- *   1. load the cart, reject if empty
- *   2. load every product, reject if any is missing or inactive
- *   3. decrement stock atomically, one item at a time
- *   4. if any decrement fails, put back everything already taken
- *   5. build the order with the factory and save it
- *   6. empty the cart
- */
+// Checkout: validate the cart, decrement stock atomically, build the order,
+// empty the cart. Any failure puts back whatever stock was already taken.
 async function checkout(userId, shippingAddress) {
   const cart = await cartRepository.findByUser(userId);
   if (!cart || cart.items.length === 0) {
@@ -48,8 +37,7 @@ async function checkout(userId, shippingAddress) {
     throw new BusinessRuleError(`${inactive.name} is no longer available`);
   }
 
-  // Track what we take so a later failure can be undone. Without replica-set
-  // transactions this manual compensation is the available option; see README.
+  // Manual compensation - no replica-set transactions on the free tier.
   const decremented = [];
   try {
     for (const item of cart.items) {
@@ -85,11 +73,7 @@ async function listForUser(userId, { page, limit } = {}) {
   return orderRepository.findByUser(userId, { page, limit });
 }
 
-/**
- * Ownership is re-checked against the authenticated user rather than trusting
- * the id in the URL. Trusting it is broken object-level authorisation, the most
- * commonly exploited API flaw there is.
- */
+// Ownership is re-checked rather than trusting the id in the URL.
 async function getForUser(orderId, userId) {
   const order = await orderRepository.findById(orderId);
   if (!order) throw new NotFoundError("Order");
@@ -114,7 +98,7 @@ async function updateStatus(orderId, nextStatus) {
     );
   }
 
-  // Returning stock on cancellation keeps the catalogue honest.
+  // Return stock when an order is cancelled.
   if (nextStatus === "cancelled") {
     for (const item of order.items) {
       await productRepository.incrementStock(item.productId, item.quantity);

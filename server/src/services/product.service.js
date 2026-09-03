@@ -2,11 +2,7 @@
 const productRepository = require("../repositories/product.repository");
 const { NotFoundError, ConflictError } = require("../errors/AppError");
 
-/**
- * Business rules for products.
- * No req, no res, no Mongoose. Only repositories and error classes.
- * That is what makes this file unit-testable with a fake repository.
- */
+// Business rules for products. No req, res or Mongoose in this layer.
 
 async function list(query) {
   return productRepository.search(query);
@@ -31,7 +27,7 @@ async function create(data) {
 }
 
 async function update(id, data) {
-  // SKU must stay unique across every other product.
+  // SKU must stay unique.
   if (data.sku) {
     const clash = await productRepository.findBySku(data.sku);
     if (clash && String(clash._id) !== String(id)) {
@@ -43,10 +39,7 @@ async function update(id, data) {
   return updated;
 }
 
-/**
- * Soft delete. The document is never removed, because historic orders
- * reference it and a hard delete would corrupt the order history.
- */
+// Soft delete - historic orders reference the product.
 async function deactivate(id) {
   const updated = await productRepository.updateById(id, { isActive: false });
   if (!updated) throw new NotFoundError("Product");

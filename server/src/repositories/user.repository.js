@@ -7,8 +7,7 @@ class UserRepository extends BaseRepository {
     super(User);
   }
 
-  // Login needs the hash; passwordHash is select:false on the schema so
-  // every other caller gets a document without it by default.
+  // Login needs the hash, which is select:false on the schema.
   async findByEmailWithPassword(email) {
     return this.model.findOne({ email: email.toLowerCase().trim() }).select("+passwordHash").exec();
   }
@@ -17,8 +16,7 @@ class UserRepository extends BaseRepository {
     return this.findOne({ email: email.toLowerCase().trim() });
   }
 
-  // Logout invalidates every outstanding refresh token by bumping the
-  // version the token's payload must match (see auth.service.refresh).
+  // Bumped on logout to invalidate outstanding refresh tokens.
   async incrementTokenVersion(userId) {
     return this.model.findByIdAndUpdate(userId, { $inc: { tokenVersion: 1 } }, { new: true }).exec();
   }

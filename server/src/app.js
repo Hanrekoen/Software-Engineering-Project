@@ -10,8 +10,7 @@ const routes = require("./routes");
 const notFound = require("./middleware/notFound");
 const errorHandler = require("./middleware/errorHandler");
 
-// Builds the Express application. Does NOT listen - server.js does that,
-// so tests can import this app without opening a port.
+// Builds the app but does not listen, so tests can import it.
 
 const app = express();
 
@@ -24,7 +23,7 @@ if (env.nodeEnv !== "test") app.use(morgan("dev"));
 
 app.use("/api", routes);
 
-// Order matters: 404 catcher, then the error handler, always last.
+// 404 catcher, then the error handler - always last.
 app.use(notFound);
 app.use(errorHandler);
 

@@ -2,11 +2,7 @@
 const productService = require("../services/product.service");
 const { ok, created, noContent, paginated } = require("../utils/response");
 
-/**
- * HTTP concerns only: read the request, call ONE service method, shape the
- * response. No database queries, no business rules, no try/catch - asyncHandler
- * in the routes file forwards rejections to the error middleware.
- */
+// HTTP only: read the request, call one service method, shape the response.
 
 async function list(req, res) {
   const { q, categoryId, brand, minPrice, maxPrice, sort, page = 1, limit = 12 } = req.query;

@@ -1,7 +1,5 @@
 "use strict";
 
-// PERSON 4 OWNS THIS FILE
-
 class AppError extends Error {
   constructor(message, status = 500, code = "INTERNAL_ERROR", details = null) {
     super(message);

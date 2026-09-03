@@ -7,7 +7,7 @@ class ProductRepository extends BaseRepository {
     super(Product);
   }
 
-  // Catalogue search: text query, category and brand filters, pagination.
+  // Catalogue search with filters and pagination (FR-02).
   async search({ q, categoryId, brand, minCents, maxCents, sort, page = 1, limit = 12 }) {
     const filter = { isActive: true };
     if (q) filter.$text = { $search: q };
@@ -50,13 +50,8 @@ class ProductRepository extends BaseRepository {
     return this.model.distinct("brand", { isActive: true });
   }
 
-  /**
-   * Atomic conditional decrement.
-   * The stock condition lives INSIDE the query, so MongoDB checks and updates
-   * in one operation. Reading the stock, comparing it in JavaScript and then
-   * writing would let two shoppers both buy the last unit.
-   * Returns null when there was not enough stock.
-   */
+  // Atomic: the stock condition is inside the query, so two shoppers cannot
+  // both buy the last unit. Returns null when stock is insufficient.
   async decrementStock(productId, quantity) {
     return this.model
       .findOneAndUpdate(
@@ -67,7 +62,7 @@ class ProductRepository extends BaseRepository {
       .exec();
   }
 
-  // Used to undo a decrement when a later item in the same checkout fails.
+  // Undoes a decrement when a later checkout item fails.
   async incrementStock(productId, quantity) {
     return this.model.findByIdAndUpdate(productId, { $inc: { stockQty: quantity } }).exec();
   }

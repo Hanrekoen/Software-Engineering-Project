@@ -1,7 +1,6 @@
 "use strict";
 
-// Every response uses one envelope: { success, data, error, meta }
-// so the client writes its error handling exactly once.
+// One response envelope for the whole API: { success, data, error, meta }.
 
 function ok(res, data = null, meta = null, status = 200) {
   return res.status(status).json({ success: true, data, error: null, meta });
