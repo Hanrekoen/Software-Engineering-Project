@@ -15,9 +15,9 @@ router.get("/health", (_req, res) =>
   })
 );
 
-// router.use("/auth", require("./auth.routes"));             // Person 2
+router.use("/auth", require("./auth.routes"));                // Person 2
 router.use("/products", require("./product.routes"));         // Person 1
-// router.use("/categories", require("./category.routes"));   // Person 4
+router.use("/categories", require("./category.routes"));      // Person 4
 // router.use("/cart", require("./cart.routes"));             // Person 3
 router.use("/orders", require("./order.routes"));             // Person 1
 router.use("/admin", require("./admin.routes"));              // Person 1

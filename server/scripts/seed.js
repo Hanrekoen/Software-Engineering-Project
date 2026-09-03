@@ -261,7 +261,7 @@ async function run() {
   console.log(`[seed] inserted ${inserted.length} products`);
 
   const hashedPassword = await bcrypt.hash(seed_password, 10);
-  const users = await User.insertMany(USERS.map((u) => ({ ...u, passwordhash: hashedPassword })));
+  const users = await User.insertMany(USERS.map((u) => ({ ...u, passwordHash: hashedPassword })));
   console.log(`[seed] inserted ${users.length} users (password: ${seed_password})`);
   const [, , , ,lebo, sipho, tshepo, scott] = users;
 
