@@ -21,12 +21,12 @@ module.exports = function errorHandler(err, req, res, _next) {
     code = "INVALID_JSON";
     message = "Request body is not valid JSON";
   } else if (err.name === "TokenExpiredError") {
-    // express.json() JSON parse error
+    // jsonwebtoken: token past its exp claim
     status = 401;
     code = "TOKEN_EXPIRED";
     message = "Your session has expired - please log in again";
   } else if (err.name === "JsonWebTokenError") {
-    // express.json() JSON parse error
+    // jsonwebtoken: malformed or wrong-signature token
     status = 401;
     code = "INVALID_TOKEN";
     message = "Invalid authentication token";
