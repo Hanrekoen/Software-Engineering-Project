@@ -5,17 +5,9 @@ const { hashPassword, comparePassword } = require("../utils/password");
 const { signAccessToken, signRefreshToken, verifyRefreshToken } = require("../utils/jwt");
 const { ConflictError, UnauthorizedError } = require("../errors/AppError");
 
-/**
- * Business rules for authentication.
- * No req, no res, no Mongoose - only the user repository, password/jwt
- * helpers and error classes, so this is unit-testable against a fake
- * repository (see ARCHITECTURE.md).
- */
+// Business rules for authentication. No req, res or Mongoose in this layer.
 
-// Strips fields a client should never see. passwordHash is already
-// excluded by the schema's select:false, but a caller that used
-// findByEmailWithPassword (login) still has it on the document, so this
-// is the one place every response is sanitised before it leaves the layer.
+// The one place a user is sanitised before leaving the service.
 function toPublicUser(user) {
   return {
     id: user._id,
@@ -29,9 +21,7 @@ function toPublicUser(user) {
 
 function issueTokens(user) {
   const accessToken = signAccessToken({ id: user._id.toString(), role: user.role });
-  // jti makes every refresh token unique even if issued in the same
-  // second as the last one - without it, rotating right after login
-  // (same id + tokenVersion + iat) would sign an identical token.
+  // jti keeps every refresh token unique, even when issued in the same second.
   const refreshToken = signRefreshToken({
     id: user._id.toString(),
     tokenVersion: user.tokenVersion,
@@ -53,8 +43,7 @@ async function register({ firstName, lastName, email, password }) {
 async function login(email, password) {
   const user = await userRepository.findByEmailWithPassword(email);
 
-  // Same message whether the email doesn't exist or the password is
-  // wrong - distinguishing the two lets an attacker enumerate accounts.
+  // One message for both failures - distinguishing them enables enumeration.
   const invalid = () => new UnauthorizedError("Invalid email or password");
   if (!user || !user.isActive) throw invalid();
 
@@ -64,11 +53,7 @@ async function login(email, password) {
   return { user: toPublicUser(user), ...issueTokens(user) };
 }
 
-/**
- * Exchanges a valid refresh token for a new access token, and rotates the
- * refresh token itself (issuing a new one each time limits how long a
- * stolen refresh token stays useful).
- */
+// Exchanges a refresh token for a new pair, rotating the refresh token.
 async function refresh(refreshToken) {
   let payload;
   try {
@@ -79,8 +64,7 @@ async function refresh(refreshToken) {
 
   const user = await userRepository.findById(payload.id);
 
-  // tokenVersion mismatch means the user logged out (or was logged out
-  // elsewhere) since this refresh token was issued.
+  // A tokenVersion mismatch means the user has logged out since.
   if (!user || !user.isActive || user.tokenVersion !== payload.tokenVersion) {
     throw new UnauthorizedError("Session is no longer valid");
   }
@@ -88,8 +72,7 @@ async function refresh(refreshToken) {
   return issueTokens(user);
 }
 
-// Bumping tokenVersion invalidates every refresh token issued before
-// this call, on every device, without needing a token blocklist.
+// Bumping tokenVersion invalidates every outstanding refresh token.
 async function logout(userId) {
   await userRepository.incrementTokenVersion(userId);
 }

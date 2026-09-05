@@ -3,17 +3,8 @@ const authService = require("../services/auth.service");
 const { ok, created, noContent } = require("../utils/response");
 const env = require("../config/env");
 
-/**
- * HTTP concerns only: read the request, call ONE service method, shape
- * the response. No database queries, no password/JWT logic here - that
- * all lives in auth.service.js.
- *
- * The refresh token is set as an httpOnly cookie (never in the JSON
- * body) so it isn't reachable from JavaScript in the browser, which
- * limits what an XSS bug on the client could steal. The access token IS
- * returned in the body - the client keeps it in memory and sends it as
- * a Bearer header, per the plan in utils/jwt.js.
- */
+// HTTP only. The refresh token goes in an httpOnly cookie so script on the
+// page cannot read it; the access token is returned in the body.
 
 const REFRESH_COOKIE = "refreshToken";
 
@@ -22,8 +13,8 @@ function setRefreshCookie(res, token) {
     httpOnly: true,
     secure: env.isProduction,
     sameSite: "strict",
-    path: "/api/auth", // only sent back to auth endpoints, not every request
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7d - keep in sync with REFRESH_TOKEN_TTL
+    path: "/api/auth", // sent only to auth endpoints
+    maxAge: 7 * 24 * 60 * 60 * 1000, // keep in sync with REFRESH_TOKEN_TTL
   });
 }
 

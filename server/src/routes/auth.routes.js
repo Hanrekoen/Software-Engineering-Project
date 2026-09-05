@@ -8,14 +8,9 @@ const controller = require("../controllers/auth.controller");
 const { authenticate } = require("../middleware/auth");
 const { ValidationError } = require("../errors/AppError");
 
-// Person 1: mount with  router.use("/auth", require("./auth.routes"));
-// in routes/index.js (that file is yours to edit, so left commented there).
-
 const router = express.Router();
 
-// Small local adapter so express-validator's result plugs into the
-// project's single AppError -> errorHandler path instead of each route
-// handling its own 400 response.
+// Routes express-validator failures through the project's error handler.
 function validate(req, _res, next) {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -27,8 +22,7 @@ function validate(req, _res, next) {
   return next();
 }
 
-// Slows down credential stuffing / brute-force guessing without
-// affecting normal users, who never come close to this in 15 minutes.
+// Slows credential stuffing without affecting normal use.
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 10,

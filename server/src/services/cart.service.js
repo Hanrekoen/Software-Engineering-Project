@@ -4,25 +4,16 @@ const productRepository = require("../repositories/product.repository");
 const { TAX_RATE, SHIPPING_FLAT_CENTS } = require("./order.factory");
 const { NotFoundError, BusinessRuleError } = require("../errors/AppError");
 
-/**
- * Business rules for the shopping cart (FR-06).
- *
- * Cart items REFERENCE a product rather than copying its price, so the cart
- * always reflects the current catalogue price. Totals are therefore computed
- * on read, from the live product documents - never stored on the cart and
- * never accepted from the client.
- */
+// Business rules for the shopping cart (FR-06). Totals are computed on read
+// from the live product price, never stored and never taken from the client.
 
 async function loadProducts(cart) {
   const ids = cart.items.map((i) => i.productId);
   return ids.length ? productRepository.findManyByIds(ids) : [];
 }
 
-/**
- * Subtotal, tax, shipping and total, all in integer cents.
- * Tax and shipping come from order.factory so a cart and the order it
- * becomes can never quote different numbers.
- */
+// All in integer cents. Tax and shipping come from order.factory so a cart
+// and the order it becomes cannot quote different totals.
 function calculateTotals(cart, products) {
   const lines = cart.items.map((item) => {
     const product = products.find((p) => String(p._id) === String(item.productId));
@@ -58,10 +49,7 @@ async function getCart(userId) {
   return calculateTotals(cart, products);
 }
 
-/**
- * Adds a product, or increases the quantity if it is already in the cart.
- * The stock check uses the RESULTING quantity, not just the amount added.
- */
+// Adds or increases a line. Stock is checked against the resulting quantity.
 async function addItem(userId, { productId, quantity, finish }) {
   if (!Number.isInteger(quantity) || quantity <= 0) {
     throw new BusinessRuleError("Quantity must be a whole number greater than 0");

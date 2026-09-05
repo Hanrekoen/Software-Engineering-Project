@@ -1,8 +1,7 @@
 "use strict";
 const express = require("express");
 
-// PERSON 1 IS THE ONLY ONE WHO EDITS THIS FILE.
-// Export a router from your own routes file and ask for it to be mounted here.
+// Single mount point. Export a router from your routes file and add it here.
 
 const router = express.Router();
 

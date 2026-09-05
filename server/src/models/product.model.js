@@ -1,7 +1,7 @@
 "use strict";
 const mongoose = require("mongoose");
 
-// A selectable finish shown on the product detail page ("SELECT VAULT FINISH").
+// A selectable finish shown on the product detail page.
 const variantSchema = new mongoose.Schema(
   { name: { type: String, required: true }, hex: { type: String, required: true } },
   { _id: false }
@@ -21,8 +21,7 @@ const productSchema = new mongoose.Schema(
     brand:       { type: String, required: true, trim: true },   // "Makers & Brands" filter
     description: { type: String, required: true },
 
-    // Money is stored in cents as an integer. Never a float: 0.1 has no exact
-    // binary representation, so Doubles drift over repeated arithmetic.
+    // Integer cents. Floats drift: 0.1 has no exact binary representation.
     priceCents:  { type: Number, required: true, min: 0 },
 
     categoryId:  { type: mongoose.Schema.Types.ObjectId, ref: "Category", required: true },
@@ -32,7 +31,7 @@ const productSchema = new mongoose.Schema(
     variants:    { type: [variantSchema], default: [] },
     specs:       { type: [specSchema], default: [] },
 
-    // Denormalised so the catalogue can show a rating without a second query.
+    // Denormalised to avoid a second query on the catalogue.
     ratingAverage: { type: Number, min: 0, max: 5, default: 0 },
     ratingCount:   { type: Number, min: 0, default: 0 },
 

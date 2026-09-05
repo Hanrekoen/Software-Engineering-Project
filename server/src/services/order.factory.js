@@ -1,13 +1,7 @@
 "use strict";
 
-/**
- * Factory pattern. The ONLY place an order document is constructed.
- * Centralising it means price snapshots, totals and order numbering cannot be
- * done two different ways in two different places.
- */
-
-// The prototype shows free shipping and an 8% tax line.
-// For South African VAT, change TAX_RATE to 0.15.
+// Factory: the only place an order document is constructed.
+// Change TAX_RATE to 0.15 for South African VAT.
 const SHIPPING_FLAT_CENTS = 0;
 const TAX_RATE = 0.08;
 
@@ -17,13 +11,6 @@ function generateOrderNumber(now = new Date()) {
   return `ORD-${year}-${random}`;
 }
 
-/**
- * @param {Object}   input
- * @param {ObjectId} input.userId
- * @param {Array}    input.cartItems  [{ productId, quantity, finish }]
- * @param {Array}    input.products   the matching product documents
- * @param {Object}   input.shippingAddress
- */
 function buildOrder({ userId, cartItems, products, shippingAddress }) {
   const items = cartItems.map((cartItem) => {
     const product = products.find(
@@ -41,8 +28,7 @@ function buildOrder({ userId, cartItems, products, shippingAddress }) {
     };
   });
 
-  // Totals are calculated here from the database price and nowhere else.
-  // A total supplied by the client is a price-tampering vulnerability.
+  // Totals come from the database price only - never from the client.
   const subtotalCents = items.reduce(
     (sum, item) => sum + item.unitPriceCents * item.quantity,
     0

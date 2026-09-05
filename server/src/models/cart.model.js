@@ -1,8 +1,7 @@
 "use strict";
 const mongoose = require("mongoose");
 
-// Cart items REFERENCE the product, so the cart always reflects the current
-// price and stock. Compare with order items, which embed a snapshot.
+// Items reference the product, so the cart follows the live price.
 const cartItemSchema = new mongoose.Schema(
   {
     productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product", required: true },
